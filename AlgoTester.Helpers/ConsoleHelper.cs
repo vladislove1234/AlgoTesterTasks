@@ -4,7 +4,9 @@
     {
         public static int ReadInt()
         {
-            return int.Parse(Console.ReadLine());
+            var input = Console.ReadLine();
+            
+            return int.Parse(input);
         }
 
         public static IEnumerable<T> ReadItems<T>(int count, Func<string, T> parser)

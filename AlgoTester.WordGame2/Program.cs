@@ -13,7 +13,7 @@ namespace AlgoTester.WordGame2
 {
     public static class Program
     {
-        private const int WrongAnswer = -1;
+        private const int ErrorAnswer = -1;
 
         public static void Main()
         {
@@ -28,7 +28,7 @@ namespace AlgoTester.WordGame2
             }
             catch
             {
-                WriteLine(WrongAnswer);
+                WriteLine(ErrorAnswer);
             }
         }
 

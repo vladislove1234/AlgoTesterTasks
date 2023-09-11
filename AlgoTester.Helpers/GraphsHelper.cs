@@ -7,7 +7,7 @@ namespace AlgoTester.Helpers
         {
             var queue = new Queue<T>();
             var visited = new HashSet<T>();
-            var parents = new List<(T Parent, T Child)>();
+            var parents = new List<ParentChildrenPair<T>>();
 
             queue.Enqueue(start);
             visited.Add(start);
@@ -29,7 +29,7 @@ namespace AlgoTester.Helpers
                     queue.Enqueue(item);
                     visited.Add(item);
 
-                    parents.Add((current, item));
+                    parents.Add(new ParentChildrenPair<T>(current, item));
 
                     if (item.Equals(end))
                     {
@@ -60,6 +60,19 @@ namespace AlgoTester.Helpers
             }
 
             return path;
+        }
+    }
+
+    public class ParentChildrenPair<T>
+    {
+        public T Parent { get; }
+        
+        public T Child { get; }
+        
+        public ParentChildrenPair(T parent, T child)
+        {
+            Parent = parent;
+            Child = child;
         }
     }
 }
