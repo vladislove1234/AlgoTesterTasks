@@ -21,8 +21,7 @@ namespace AlgoTester.Helpers
                     break;
                 }
 
-                var childrenItems = items.Where(x => !visited.Contains(x) && isConnectedPredicate(current, x))
-                    .ToList();
+                var childrenItems = items.Where(x => !visited.Contains(x) && isConnectedPredicate(current, x));
 
                 foreach (var item in childrenItems)
                 {
@@ -61,9 +60,63 @@ namespace AlgoTester.Helpers
 
             return path;
         }
+        
+        public static bool HasPathBfs<T>(this IEnumerable<T> items, 
+            Func<T,T, bool> isConnectedPredicate, 
+            Func<T, bool> isStartItem,
+            Func<T,bool> isLastItem)
+        {
+            var queue = new Queue<T>();
+            var visited = new HashSet<T>();
+            var lastItems = new HashSet<T>();
+
+            foreach (var item in items)
+            {
+                if (isStartItem(item))
+                {
+                    queue.Enqueue(item);
+                    visited.Add(item);
+                }
+                
+                if (isLastItem(item))
+                {
+                    lastItems.Add(item);
+                }
+            }
+
+            if (!lastItems.Any())
+            {
+                return false;
+            }
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+
+                if (lastItems.Contains(current))
+                {
+                    return true;
+                }
+
+                var childrenItems = items.Where(x => !visited.Contains(x) && isConnectedPredicate(current, x));
+
+                foreach (var item in childrenItems)
+                {
+                    queue.Enqueue(item);
+                    visited.Add(item);
+
+                    if (lastItems.Contains(item))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 
-    public class ParentChildrenPair<T>
+    public struct ParentChildrenPair<T>
     {
         public T Parent { get; }
         
