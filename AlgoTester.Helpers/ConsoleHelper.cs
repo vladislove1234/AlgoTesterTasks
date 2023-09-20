@@ -25,5 +25,13 @@
         {
             return Enumerable.Range(0, count).Select(_ => parser(Console.ReadLine()));
         }
+        
+        public static void ReadItems(int count, Action<string> delegateAction)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                delegateAction(Console.ReadLine());   
+            }
+        }
     }
 }
