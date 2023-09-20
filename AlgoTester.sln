@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgoTester.End", "AlgoTeste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgoTester.Trilandia", "AlgoTester.Trilandia\AlgoTester.Trilandia.csproj", "{7C17C50C-2F39-4A45-B57F-CD6CAF482083}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgoTester.ToiletMan", "AlgoTester.ToiletMan\AlgoTester.ToiletMan.csproj", "{2B015606-0040-41F1-BA1E-2D015F94550E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{7C17C50C-2F39-4A45-B57F-CD6CAF482083}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C17C50C-2F39-4A45-B57F-CD6CAF482083}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C17C50C-2F39-4A45-B57F-CD6CAF482083}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B015606-0040-41F1-BA1E-2D015F94550E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B015606-0040-41F1-BA1E-2D015F94550E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B015606-0040-41F1-BA1E-2D015F94550E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B015606-0040-41F1-BA1E-2D015F94550E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
