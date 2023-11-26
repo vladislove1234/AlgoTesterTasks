@@ -26,6 +26,11 @@
             return Enumerable.Range(0, count).Select(_ => parser(Console.ReadLine()));
         }
         
+        public static IEnumerable<T> ReadItems<T>(int count, Func<string, IEnumerable<T>> parser)
+        {
+            return Enumerable.Range(0, count).SelectMany(_ => parser(Console.ReadLine()));
+        }
+        
         public static void ReadItems(int count, Action<string> delegateAction)
         {
             for (int i = 0; i < count; i++)
