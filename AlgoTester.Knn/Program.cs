@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters;
 using System.Threading;
 using System.Threading.Tasks;
 using static System.Console;
@@ -28,7 +30,7 @@ namespace AlgoTester.Knn
             {
                 var input = ReadLine().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
 
-                var postCard = new Postcard(int.Parse(input[0]), int.Parse(input[1]));
+                var postCard = new Postcard(int.Parse(input[1]), int.Parse(input[0]));
 
                 classesItems[postCard] = i + 1;
             }
@@ -37,28 +39,19 @@ namespace AlgoTester.Knn
             {
                 var input = ReadLine().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
 
-                var postCard = new Postcard(int.Parse(input[0]), int.Parse(input[1]));
+                var postCard = new Postcard(int.Parse(input[1]), int.Parse(input[0]));
 
-                var closestClasses = classesItems.OrderBy(x => x.Key.DistanceTo(postCard));
+                var closestClasses = classesItems.OrderBy(x => x.Key.DistanceTo(postCard)).ToArray();
 
                 var classesPoints = new Dictionary<int, int>();
                 
-                var counter = 0;
-
-                var lastDistance = -1.0d;
+                var lastDistance = closestClasses[neighboursCount <= closestClasses.Length ? neighboursCount - 1 : closestClasses.Length - 1].Key.DistanceTo(postCard);
                 
-                foreach (var closestClass in closestClasses)
+                for(int j = 0; j < closestClasses.Length && (j < neighboursCount || closestClasses[j].Key.DistanceTo(postCard) == lastDistance); j++)
                 {
-                    if (counter >= neighboursCount && lastDistance != closestClass.Key.DistanceTo(postCard))
-                    {
-                        break;
-                    }
-                    
-                    classesPoints[closestClass.Value] = classesPoints.TryGetValue(closestClass.Value, out var points) ? points + 1 : 1;
-                    
-                    lastDistance = closestClass.Key.DistanceTo(postCard);
+                    var currentClass = closestClasses[j].Value;
 
-                    counter++;
+                    classesPoints[currentClass] = classesPoints.TryGetValue(currentClass, out var points) ? points + 1 : 1;
                 }
 
                 var closestClass1 = classesPoints.OrderByDescending(x => x.Value).ThenBy(x => x.Key).First().Key;
@@ -94,7 +87,7 @@ namespace AlgoTester.Knn
 
             public override int GetHashCode()
             {
-                return Height.GetHashCode() ^ Width.GetHashCode();
+                return new Random().Next(0,100000);
             }
         }
     }
