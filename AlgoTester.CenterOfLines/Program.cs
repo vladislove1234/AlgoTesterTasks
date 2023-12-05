@@ -17,17 +17,24 @@ namespace AlgoTester.CenterOfLines
         {
             var itemsCount = ReadInt();
 
+            var initialPoint = new Point();
+
             var lines = ReadItems<Line>(itemsCount, s =>
             {
                 var inputraw = s.Split().Where(x => !string.IsNullOrEmpty(x)).ToArray();
                 var input = inputraw.Select(x => double.Parse(x)).ToArray();
 
-                return new Line(new Point(input[0], input[1], input[2]), new Point(input[3], input[4], input[0]));
+                var startPoint = new Point(input[0], input[1], input[2]);
+                var endPoint = new Point(input[3], input[4], input[5]);
+
+                initialPoint += (endPoint + startPoint);
+
+                return new Line(startPoint, endPoint);
             }).ToArray();
 
             Func<Point, double> objectiveFunction = x => lines.Sum(l2 => l2.DistanceFromPoint(x));
 
-            Point initialPoint = new Point( lines.Average(l => l.EndPoint.X - l.StartPoint.X)/2 , lines.Average(l => l.EndPoint.Y - l.StartPoint.Y)/2 , lines.Average(l => l.EndPoint.Z - l.StartPoint.Z)/2); // Initial guess
+            initialPoint /= itemsCount * 6;
 
             Point result = NelderMeadOptimize(objectiveFunction, initialPoint);
 
@@ -145,9 +152,9 @@ namespace AlgoTester.CenterOfLines
             }
         }
 
-        static Point[] InitializeSimplex(Point initialPoint)
+        static Point[] InitializeInitialPoints(Point initialPoint)
         {
-            var simplex = new Point[4]
+            var points = new Point[4]
             {
                 initialPoint,
                 new Point(initialPoint.X * 0.1, initialPoint.Y, initialPoint.Z),
@@ -155,7 +162,7 @@ namespace AlgoTester.CenterOfLines
                 new Point(initialPoint.X, initialPoint.Y, initialPoint.Z * 0.1),
             };
 
-            return simplex;
+            return points;
         }
 
         static Point NelderMeadOptimize(Func<Point, double> objectiveFunction, Point initialPoint)
@@ -165,7 +172,7 @@ namespace AlgoTester.CenterOfLines
             double gamma = 2; // Expansion coefficient
             double sigma = 0.5; // Shrinkage coefficient
 
-            var points = InitializeSimplex(initialPoint);
+            var points = InitializeInitialPoints(initialPoint);
 
             while (true)
             {
@@ -178,7 +185,7 @@ namespace AlgoTester.CenterOfLines
                 var secondWorst = orderedPoints.TakeLast(2).First();
                 var best = orderedPoints.First();
 
-                if(Math.Abs(objectiveFunction(best) - 4) < 0.0001)
+                if(Math.Abs(objectiveFunction(best) - objectiveFunction(worst)) < 1e-16)
                 {
                     break;
                 }
@@ -240,7 +247,7 @@ namespace AlgoTester.CenterOfLines
                 }
             }
 
-            return points.MinBy(p => objectiveFunction(p));
+            return points.OrderBy(p => objectiveFunction(p)).First();
         }
 
         public static double StandartDeviation(Point[] points)
