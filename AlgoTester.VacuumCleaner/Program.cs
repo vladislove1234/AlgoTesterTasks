@@ -30,55 +30,36 @@ namespace AlgoTester.VacuumCleaner
 
                 for (int j = 0; j < x; j++)
                 {
+                    var point = new Point(j, i);
+                    
                     if (line[j] == '*')
                     {
-                        points.Add(new Point(j, i));
+                        point.IsDirty = true;
                     }
+
+                    points.Add(point);
                 }
             }
 
             var pointsCount = points.Count;
 
-            points.Add(new Point(0, 0));
+            var path = FindShortestPath(points, points.First(p => p.Y == 0 && p.X == 0));
 
-            /*var graph = new int[points.Count][];
-
-            for (int i = 0; i < points.Count; i++)
-            {
-                graph[i] = new int[points.Count];
-
-                for (int j = 0; j < points.Count; j++)
-                {
-                    graph[i][j] = points[i].GetDistance(points[j]);
-                }
-            }*/
-
-            var path = FindShortestPath(points, new Point(0,0));
-
-            var length = 0;
-
-            for (int i = 1; i < path.Length; i++)
-            {
-                var from = path[i - 1];
-                var to = path[i];
-
-                length += from.GetDistance(to);
-            }
-
-            length += pointsCount;
+            var length = path.Length - 1 + points.Count(p => p.IsDirty);
 
             WriteLine(length);
         }
 
         public static Point[] FindShortestPath(HashSet<Point> points, Point start)
         {
-            var queue = new PriorityQueue<Point,int>();
+            var queue = new AlgoTester.Helpers.PriorityQueue<Point>();
             var paths = new Dictionary<Point, List<Point>>();
             var distancesFromStart = new Dictionary<Point, int>();
 
             var visited = new HashSet<Point>();
             
             var pointsCount = points.Count;
+            var dirtyPoints = points.Count(p => p.IsDirty);
 
             queue.Enqueue(start,0);
 
@@ -101,25 +82,19 @@ namespace AlgoTester.VacuumCleaner
                 var current = queue.Dequeue();
 
                 var currentPath = paths[current];
-
-                var currentLength = currentPath.Count;
-
-                if (currentLength == pointsCount)
+                
+                if(current.IsDirty && currentPath.Count(p => p.IsDirty) == dirtyPoints)
                 {
                     lastPoint = current;
+                    foundLastPoint = true;
                     break;
                 }
 
-                foreach (var point in points)
+                var neighbours = GetNeighbours(current, points);
+
+                foreach (var point in neighbours)
                 {
-                    if (current.Equals(point) || point.Equals(start))
-                    {
-                        continue;
-                    }
-
-                    int remainedArea = GetArea(points.Except(currentPath.Append(point)));
-
-                    int currPrice = remainedArea + distancesFromStart[current] + current.GetDistance(point); 
+                    int currPrice = (int)(currentPath.Count + 1 + PrimMSTLength(point, points, currentPath.Append(point).ToHashSet()) * 1.5);
 
                     if (prices.TryGetValue(point, out var pointPrice))
                     {
@@ -128,7 +103,6 @@ namespace AlgoTester.VacuumCleaner
                             prices[point] = currPrice;
                             queue.Enqueue(point, currPrice);
                             paths[point] = currentPath.Append(point).ToList();
-                            distancesFromStart[point] = distancesFromStart[current] + current.GetDistance(point);
                         }
                     }
                     else
@@ -136,7 +110,6 @@ namespace AlgoTester.VacuumCleaner
                         prices[point] = currPrice;
                         queue.Enqueue(point, currPrice);
                         paths[point] = currentPath.Append(point).ToList();
-                        distancesFromStart[point] = distancesFromStart[current] + current.GetDistance(point);
                     }
                 }
             }
@@ -146,76 +119,72 @@ namespace AlgoTester.VacuumCleaner
             return path.ToArray();
         }
 
-        private static int GetArea(IEnumerable<Point> points)
+        private static Point[] GetNeighbours(Point current, HashSet<Point> points)
         {
-            int minX = int.MaxValue, minY= int.MaxValue, maxX= int.MinValue, maxY = int.MinValue;
+            var neighbours = new List<Point>();
 
-            foreach (var point in points)
+            var up = points.FirstOrDefault(p => p.X == current.X && p.Y == current.Y - 1);
+            var down = points.FirstOrDefault(p => p.X == current.X && p.Y == current.Y + 1);
+            var left = points.FirstOrDefault(p => p.X == current.X - 1 && p.Y == current.Y);
+            var right = points.FirstOrDefault(p => p.X == current.X + 1 && p.Y == current.Y);
+
+            if (points.Contains(up))
             {
-                if (point.X < minX)
-                {
-                   minX = point.X;
-                }
-
-               if (point.X > maxX)
-               {
-                   maxX = point.X;
-               }
-
-               if (point.Y < minY)
-               {
-                   minY = point.Y;
-               }
-
-               if (point.Y > maxY)
-               {
-                   maxY = point.Y;
-               }
-
+                neighbours.Add(up);
             }
-            
-           var Xrange = Math.Max(maxX - minX + 1,1);
-           var Yrange = Math.Max(maxY - minY + 1,1);
 
-           return Xrange * Yrange;
+            if (points.Contains(down))
+            {
+                neighbours.Add(down);
+            }
+
+            if (points.Contains(left))
+            {
+                neighbours.Add(left);
+            }
+
+            if (points.Contains(right))
+            {
+                neighbours.Add(right);
+            }
+
+            return neighbours.ToArray();
         }
 
-        public static int PrimMSTLength(int startPoint, int[][] graph, bool[] visited)
+        public static int PrimMSTLength(Point startPoint, HashSet<Point> graph, HashSet<Point> visited)
         {
-            var mstVisited = new bool[visited.Length];
-            mstVisited[startPoint] = true;
+            var mstVisited = new HashSet<Point>();
+            mstVisited.Add(startPoint);
             int length = 0;
 
-            while (mstVisited.Count(x => x) + visited.Count(x => x) != visited.Length)
-            {
-                int minLength = int.MaxValue, minPoint = -1;
-                
-                for(int i = 0; i < graph.Length; i++)
-                {
-                    if (!mstVisited[i])
-                    {
-                        continue;
-                    }
+            var dirtyPoints = graph.Where(p => p.IsDirty).Except(visited).Append(startPoint).ToHashSet();
 
-                    for (int j = 0; j < graph.Length; j++)
+            //find mst from dirty points, calculate distnce by method in Point GetDistance and don't look for neighbours as all points are neighbours to eac other
+            while (mstVisited.Count < dirtyPoints.Count)
+            {
+                var minDistance = int.MaxValue;
+                Point minPoint = new Point(0, 0);
+                foreach (var point in mstVisited)
+                {
+                    foreach (var otherPoint in dirtyPoints)
                     {
-                        if (mstVisited[j] || visited[j])
+                        if (mstVisited.Contains(otherPoint))
                         {
                             continue;
                         }
 
-                        var distance = graph[i][j];
+                        var distance = point.GetDistance(otherPoint);
 
-                        if (distance < minLength)
+                        if (distance < minDistance)
                         {
-                            minLength = distance;
-                            minPoint = j;
+                            minDistance = distance;
+                            minPoint = otherPoint;
                         }
                     }
                 }
 
-                mstVisited[minPoint] = true;
-                length += minLength;
+                length += minDistance;
+                mstVisited.Add(minPoint);
             }
 
             return length;
@@ -225,11 +194,15 @@ namespace AlgoTester.VacuumCleaner
         {
             public int X { get; }
             public int Y { get; }
+            
+            public bool IsDirty { get; set; }
 
             public Point(int x, int y)
             {
                 X = x;
                 Y = y;
+
+                IsDirty = false;
             }
 
             public int GetDistance(Point other)
@@ -240,16 +213,6 @@ namespace AlgoTester.VacuumCleaner
             public bool Equals(Point other)
             {
                 return X == other.X && Y == other.Y;
-            }
-
-            public override bool Equals(object? obj)
-            {
-                if (obj is Point p)
-                {
-                    return X == p.X && Y == p.Y;
-                }
-
-                return false;
             }
 
             public override int GetHashCode()

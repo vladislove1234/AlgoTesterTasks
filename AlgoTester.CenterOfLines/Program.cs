@@ -17,8 +17,6 @@ namespace AlgoTester.CenterOfLines
         {
             var itemsCount = ReadInt();
 
-            var initialPoint = new Point();
-
             var lines = ReadItems<Line>(itemsCount, s =>
             {
                 var inputraw = s.Split().Where(x => !string.IsNullOrEmpty(x)).ToArray();
@@ -27,18 +25,16 @@ namespace AlgoTester.CenterOfLines
                 var startPoint = new Point(input[0], input[1], input[2]);
                 var endPoint = new Point(input[3], input[4], input[5]);
 
-                initialPoint += (endPoint + startPoint);
-
                 return new Line(startPoint, endPoint);
             }).ToArray();
 
             Func<Point, double> objectiveFunction = x => lines.Sum(l2 => l2.DistanceFromPoint(x));
 
-            initialPoint /= itemsCount * 6;
+            Point initialPoint = lines.Aggregate(new Point(),(l1,l2) => l1 + (l2.EndPoint - l2.StartPoint)/2);
 
             Point result = NelderMeadOptimize(objectiveFunction, initialPoint);
 
-            Console.WriteLine($"{objectiveFunction(result)}");
+            WriteLine($"{objectiveFunction(result):F7}");
         }
 
         public struct Point
@@ -128,13 +124,25 @@ namespace AlgoTester.CenterOfLines
                 var AB = EndPoint - StartPoint;
                 var AP = P - StartPoint;
 
-                double projectionFactor = DotProduct(AP, AB) / DotProduct(AB, AB);
-                Point projection =  AB * projectionFactor;
+                double projection = DotProduct(AP, AB);
+                double abLengthSquared = DotProduct(AB, AB);
 
-                Point perpendicular = AP - projection;
+                var d = projection / abLengthSquared;
+                
+                if (d < 0)
+                {
+                    return Distance(P, StartPoint);
+                }
+                else if (d > 1)
+                {
+                    return Distance(P, EndPoint);
+                }
+                else
+                {
+                    var closestPoint = StartPoint + AB * d;
 
-                double distance = Magnitude(perpendicular);
-                return distance;
+                    return Distance(P, closestPoint);
+                }
             }
 
             static double DotProduct(Point v1, Point v2)
@@ -143,18 +151,11 @@ namespace AlgoTester.CenterOfLines
 
                 return result;
             }
-
-            static double Magnitude(Point vector)
-            {
-                double sumSquares = vector.X*vector.X + vector.Y * vector.Y + vector.Z * vector.Z;
-
-                return Math.Sqrt(sumSquares);
-            }
         }
 
-        static Point[] InitializeInitialPoints(Point initialPoint)
+        static Point[] InitializeSimplex(Point initialPoint)
         {
-            var points = new Point[4]
+            var simplex = new Point[4]
             {
                 initialPoint,
                 new Point(initialPoint.X * 0.1, initialPoint.Y, initialPoint.Z),
@@ -162,7 +163,12 @@ namespace AlgoTester.CenterOfLines
                 new Point(initialPoint.X, initialPoint.Y, initialPoint.Z * 0.1),
             };
 
-            return points;
+            return simplex;
+        }
+        
+        static double Distance(Point a, Point b)
+        {
+            return Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y,2) + Math.Pow(a.Z - b.Z,2));
         }
 
         static Point NelderMeadOptimize(Func<Point, double> objectiveFunction, Point initialPoint)
@@ -172,9 +178,11 @@ namespace AlgoTester.CenterOfLines
             double gamma = 2; // Expansion coefficient
             double sigma = 0.5; // Shrinkage coefficient
 
-            var points = InitializeInitialPoints(initialPoint);
+            var points = InitializeSimplex(initialPoint);
 
-            while (true)
+            var lastBest = new Point(-1000, -1000, -1000);
+
+            while (StandartDeviation(points) > 1e-8)
             {
                 var orderedPoints = points.OrderBy(p => objectiveFunction(p)).ToArray();
 
@@ -184,11 +192,8 @@ namespace AlgoTester.CenterOfLines
                 var worst = orderedPoints.Last();
                 var secondWorst = orderedPoints.TakeLast(2).First();
                 var best = orderedPoints.First();
-
-                if(Math.Abs(objectiveFunction(best) - objectiveFunction(worst)) < 1e-16)
-                {
-                    break;
-                }
+                
+                lastBest = best;
 
                 //reflection 
 

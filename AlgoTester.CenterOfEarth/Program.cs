@@ -10,7 +10,7 @@ using static AlgoTester.Helpers.ConsoleHelper;
 
 namespace AlgoTester.CenterOfEarth
 {
-    public static class Program
+    public static class mProgram
     {
         public const double E = 1e-7;
         

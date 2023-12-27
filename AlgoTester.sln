@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgoTester.CenterOfLines", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgoTester.HardChoice", "AlgoTester.HardChoice\AlgoTester.HardChoice.csproj", "{57AC9A3E-65E1-4F11-8328-B1F92802D73C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgoTester.Lidar", "AlgoTester.Lidar\AlgoTester.Lidar.csproj", "{CEDFC19D-8C7C-4BAE-8B7B-CA25730ADFE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,5 +80,9 @@ Global
 		{57AC9A3E-65E1-4F11-8328-B1F92802D73C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57AC9A3E-65E1-4F11-8328-B1F92802D73C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57AC9A3E-65E1-4F11-8328-B1F92802D73C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEDFC19D-8C7C-4BAE-8B7B-CA25730ADFE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEDFC19D-8C7C-4BAE-8B7B-CA25730ADFE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEDFC19D-8C7C-4BAE-8B7B-CA25730ADFE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEDFC19D-8C7C-4BAE-8B7B-CA25730ADFE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
